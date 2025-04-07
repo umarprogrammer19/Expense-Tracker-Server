@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.models.js';
+import { verifyToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -33,3 +34,13 @@ router.post('/login', async (req, res) => {
 });
 
 export default router;
+
+router.get("/me", verifyToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
